@@ -38,7 +38,7 @@ def read_schedule():
     df['Days'] = df['Days'].apply(parse_day)
     df['Times'] = df.apply(lambda row: parse_time(row['Begin Time'], row['End Time']), axis=1)
     df['Capacity'] = df.apply(lambda row: 0 if pd.isna(row['FT 1st']) else int(row['FT 1st']), axis=1)
-    return df
+    return df[df['Capacity'] > 0]
 
 if __name__ == '__main__':
     print(read_schedule())
