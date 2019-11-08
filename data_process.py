@@ -1,4 +1,4 @@
-import csv
+import pandas as pd
 
 def parse_semester(semester_text):
     # Binary representation of semester, 0 means slot taken and 1 means available,
@@ -32,20 +32,13 @@ def parse_time(begin_time_text, end_time_text):
     return parse_12h_time(begin_time_text), parse_12h_time(end_time_text) 
 
 def read_schedule():
-    class_infos = []
-    with open('data/elective_schedule.csv') as elective_schedule:
-        reader = csv.DictReader(elective_schedule)
-        for row in reader:
-            class_info = {
-                'id': row['Course'],
-                'unit': float(row['Units']),
-                'semester': parse_semester(row['Sem']),
-                'day': parse_day(row['Days']),
-                'time': parse_time(row['Begin Time'], row['End Time']),
-                'capacity': 0 if not row['FT 1st '] else int(row['FT 1st ']),
-            }
-            class_infos.append(class_info)
-    return class_infos
+    df = pd.read_csv('data/elective_schedule.csv')
+    df['Units'] = df['Units'].apply(float)
+    df['Sem'] = df['Sem'].apply(parse_semester)
+    df['Days'] = df['Days'].apply(parse_day)
+    df['Times'] = df.apply(lambda row: parse_time(row['Begin Time'], row['End Time']), axis=1)
+    df['Capacity'] = df.apply(lambda row: 0 if pd.isna(row['FT 1st']) else int(row['FT 1st']), axis=1)
+    return df
 
 if __name__ == '__main__':
     print(read_schedule())
